@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Walima Invitation | Malik Arslan</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ================= ENVELOPE INTRO SCREEN ================= -->
+  <section id="envelope-screen" class="envelope-screen">
+    <div id="envelope-wrapper" class="envelope-wrapper" role="button" tabindex="0" aria-label="Open Walima Invitation">
+      <img
+        src="image/envelope.jpg"
+        alt="Walima Invitation Envelope"
+        class="envelope-base"
+      />
+      <div class="envelope-flap"></div>
+      <div class="envelope-glow"></div>
+    </div>
+  </section>
+
+  <!-- ================= GOLDEN LIGHT BURST TRANSITION ================= -->
+  <div id="light-burst" class="light-burst"></div>
+
+  <!-- ================= CONFETTI / PETALS CONTAINER ================= -->
+  <div id="confetti-container" class="confetti-container"></div>
+
+  <!-- ================= MAIN INVITATION ================= -->
+  <main id="invitation-container" class="invitation-container hidden">
+    <!-- 1. HERO VIDEO SECTION -->
+    <section class="hero-section">
+      <video id="bg-video" class="bg-video" autoplay muted loop playsinline>
+        <source src="bg-video.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-overlay"></div>
+
+      <div class="hero-content">
+        <p class="bismillah-arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <p class="hero-subtitle">We are honored to welcome you to the<br />Walima Ceremony of</p>
+
+        <h1 class="hero-names">
+          <span class="name-line">Malik Arslan</span>
+          <span class="ampersand">&amp;</span>
+          <span class="name-line">Daughter of Malik Tariq</span>
+        </h1>
+      </div>
+
+      <div class="scroll-indicator">
+        <span>SCROLL</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- 2. BLESSING MESSAGE SECTION -->
+    <section class="content-section cream-bg reveal">
+      <div class="section-inner">
+        <div class="mini-ornament">❦</div>
+        <p class="blessing-text">
+          With the blessings of Almighty Allah, we cordially request the pleasure of your gracious presence at the
+          <strong>Walima Ceremony</strong> of our beloved son, <strong>Malik Arslan</strong>. Thank you for being part of this blessed occasion.
+        </p>
+        <div class="mini-heart">♥</div>
+      </div>
+    </section>
+
+    <!-- 3. HEART SCRATCH TO REVEAL DATE & TIME -->
+    <section class="content-section cream-bg reveal">
+      <div class="section-inner">
+        <h2 id="scratch-heading" class="script-heading">Scratch to Reveal</h2>
+
+        <div class="heart-scratch-wrapper">
+          <div class="heart-card">
+            <div class="heart-outline">
+              <p class="reveal-tag">You're Invited!</p>
+              <p class="reveal-date">20 - 12 - 2026</p>
+              <p class="reveal-day">Sunday</p>
+              <p class="reveal-time">8:00 PM Onwards</p>
+            </div>
+          </div>
+          <canvas id="scratch-canvas" width="280" height="260"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. LIVE COUNTDOWN -->
+    <section class="content-section cream-bg reveal">
+      <div class="section-inner">
+        <h2 class="script-heading">Counting Down to Forever</h2>
+
+        <div id="countdown" class="countdown-row">
+          <div class="count-card">
+            <span id="days">00</span>
+            <small>DAYS</small>
+          </div>
+          <div class="count-card">
+            <span id="hours">00</span>
+            <small>HOURS</small>
+          </div>
+          <div class="count-card">
+            <span id="minutes">00</span>
+            <small>MINUTES</small>
+          </div>
+          <div class="count-card">
+            <span id="seconds">00</span>
+            <small>SECONDS</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. VENUE SECTION -->
+    <section class="content-section cream-bg reveal">
+      <div class="section-inner">
+        <div class="section-icon">📍</div>
+        <h2 class="script-heading">Venue</h2>
+        <h3 class="venue-title">M B Palace</h3>
+        <p class="venue-address">Ghory Shah Chonk, Hafizabad Road, Gujranwala</p>
+        <a
+          href="https://www.google.com/maps/search/?api=1&query=M+B+Palace+Ghory+Shah+Chonk+Hafizabad+Road+Gujranwala"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="royal-btn map-btn"
+        >
+          View on Google Maps
+        </a>
+      </div>
+    </section>
+
+    <!-- 6. SEND A MESSAGE / RSVP -->
+    <section class="content-section cream-bg reveal">
+      <div class="section-inner">
+        <div class="section-icon">✉</div>
+        <h2 class="script-heading">Send a Message</h2>
+
+        <form id="rsvp-form" class="rsvp-form">
+          <label for="guest-name">Your Name</label>
+          <input
+            type="text"
+            id="guest-name"
+            placeholder="Your full name"
+            required
+          />
+
+          <label for="guest-status">Will you be attending?</label>
+          <select id="guest-status" required>
+            <option value="">Select...</option>
+            <option value="attending">Joyfully Attending</option>
+            <option value="declined">Regretfully Unable to Attend</option>
+          </select>
+
+          <label for="guest-wish">Your Message</label>
+          <textarea
+            id="guest-wish"
+            rows="3"
+            placeholder="Write your wishes..."
+          ></textarea>
+
+          <button type="submit" class="royal-btn submit-btn">Send Message</button>
+        </form>
+
+        <p id="rsvp-message" class="rsvp-message"></p>
+      </div>
+    </section>
+
+    <!-- 7. CLOSING FOOTER -->
+    <footer class="closing-footer reveal">
+      <p class="closing-script">We can't wait to celebrate with you!</p>
+      <p class="closing-names">Malik Arslan &amp; Family</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
