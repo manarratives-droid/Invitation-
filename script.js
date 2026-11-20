@@ -1,158 +1,248 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Envelope Opening & Light Burst Animation
   const envelopeScreen = document.getElementById("envelope-screen");
-  const openSealBtn = document.getElementById("open-seal-btn");
-  const mainCard = document.getElementById("main-card");
+  const envelopeWrapper = document.getElementById("envelope-wrapper");
+  const lightBurst = document.getElementById("light-burst");
+  const invitationContainer = document.getElementById("invitation-container");
+  const bgVideo = document.getElementById("bg-video");
 
-  if (openSealBtn && envelopeScreen && mainCard) {
-    openSealBtn.addEventListener("click", () => {
-      envelopeScreen.classList.add("opening");
+  let isOpened = false;
 
-      setTimeout(() => {
-        envelopeScreen.classList.add("hidden");
-        mainCard.classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 850);
-    });
+  /* ================= 1. ENVELOPE OPENING + LIGHT BURST ================= */
+  function openInvitation() {
+    if (isOpened) return;
+    isOpened = true;
+
+    envelopeWrapper.classList.add("opening");
+
+    setTimeout(() => {
+      lightBurst.classList.add("active");
+    }, 550);
+
+    setTimeout(() => {
+      invitationContainer.classList.remove("hidden");
+      envelopeScreen.classList.add("fade-out");
+
+      if (bgVideo) {
+        bgVideo.play().catch(() => {});
+      }
+
+      initScrollAnimations();
+      initHeartScratch();
+    }, 1050);
+
+    setTimeout(() => {
+      lightBurst.classList.remove("active");
+    }, 1750);
   }
 
-  // 2. Live Countdown Timer (20 Dec 2026, 8:00 PM)
+  envelopeWrapper.addEventListener("click", openInvitation);
+  envelopeWrapper.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openInvitation();
+    }
+  });
+
+  /* ================= 2. SCROLL REVEAL ANIMATIONS ================= */
+  function initScrollAnimations() {
+    const reveals = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.14 }
+    );
+
+    reveals.forEach((el) => observer.observe(el));
+  }
+
+  /* ================= 3. HEART SCRATCH CARD + PETALS ================= */
+  function initHeartScratch() {
+    const canvas = document.getElementById("scratch-canvas");
+    const scratchHeading = document.getElementById("scratch-heading");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    let isDrawing = false;
+    let isRevealed = false;
+
+    function drawHeartPath(context, x, y, width, height) {
+      context.beginPath();
+      const topCurveHeight = height * 0.3;
+      context.moveTo(x, y + topCurveHeight);
+      context.bezierCurveTo(x, y, x - width / 2, y, x - width / 2, y + topCurveHeight);
+      context.bezierCurveTo(
+        x - width / 2,
+        y + (height + topCurveHeight) / 2,
+        x,
+        y + (height + topCurveHeight) / 1.35,
+        x,
+        y + height
+      );
+      context.bezierCurveTo(
+        x,
+        y + (height + topCurveHeight) / 1.35,
+        x + width / 2,
+        y + (height + topCurveHeight) / 2,
+        x + width / 2,
+        y + topCurveHeight
+      );
+      context.bezierCurveTo(x + width / 2, y, x, y, x, y + topCurveHeight);
+      context.closePath();
+    }
+
+    ctx.save();
+    drawHeartPath(ctx, w / 2, 16, 230, 220);
+    ctx.clip();
+
+    const grad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, 140);
+    grad.addColorStop(0, "#d88a99");
+    grad.addColorStop(0.55, "#9c3d4e");
+    grad.addColorStop(1, "#6b1d2a");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle shimmer sparkles on heart
+    for (let i = 0; i < 90; i++) {
+      ctx.fillStyle = "rgba(255, 240, 220, 0.28)";
+      ctx.beginPath();
+      ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.globalCompositeOperation = "destination-out";
+
+    function getCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: ((clientX - rect.left) / rect.width) * w,
+        y: ((clientY - rect.top) / rect.height) * h,
+      };
+    }
+
+    function scratch(e) {
+      if (!isDrawing || isRevealed) return;
+      e.preventDefault();
+      const { x, y } = getCoords(e);
+      ctx.beginPath();
+      ctx.arc(x, y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      checkRevealProgress();
+    }
+
+    function checkRevealProgress() {
+      const imageData = ctx.getImageData(0, 0, w, h).data;
+      let transparentPixels = 0;
+      for (let i = 3; i < imageData.length; i += 16) {
+        if (imageData[i] === 0) transparentPixels++;
+      }
+      const totalSampled = imageData.length / 16;
+      if (transparentPixels / totalSampled > 0.42) {
+        isRevealed = true;
+        canvas.classList.add("cleared");
+        if (scratchHeading) {
+          scratchHeading.textContent = "Our forever begins";
+        }
+        launchPetals();
+      }
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      scratch(e);
+    });
+    canvas.addEventListener("mousemove", scratch);
+    window.addEventListener("mouseup", () => (isDrawing = false));
+
+    canvas.addEventListener("touchstart", (e) => {
+      isDrawing = true;
+      scratch(e);
+    }, { passive: false });
+    canvas.addEventListener("touchmove", scratch, { passive: false });
+    window.addEventListener("touchend", () => (isDrawing = false));
+  }
+
+  function launchPetals() {
+    const container = document.getElementById("confetti-container");
+    if (!container) return;
+    const colors = ["#7a1c28", "#c9a15b", "#d98292", "#f2d399"];
+
+    for (let i = 0; i < 42; i++) {
+      const petal = document.createElement("div");
+      petal.className = "petal";
+      petal.style.left = Math.random() * 100 + "vw";
+      petal.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      petal.style.animationDuration = 2.4 + Math.random() * 2 + "s";
+      petal.style.animationDelay = Math.random() * 0.5 + "s";
+      container.appendChild(petal);
+
+      setTimeout(() => petal.remove(), 4800);
+    }
+  }
+
+  /* ================= 4. LIVE COUNTDOWN (20 DEC 2026, 8:00 PM) ================= */
   const targetDate = new Date("2026-12-20T20:00:00").getTime();
-  const daysEl = document.getElementById("days");
-  const hoursEl = document.getElementById("hours");
-  const minutesEl = document.getElementById("minutes");
-  const secondsEl = document.getElementById("seconds");
 
   function updateCountdown() {
     const now = Date.now();
     const diff = targetDate - now;
 
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minsEl = document.getElementById("minutes");
+    const secsEl = document.getElementById("seconds");
+    if (!daysEl) return;
+
     if (diff <= 0) {
-      if (daysEl) daysEl.textContent = "00";
-      if (hoursEl) hoursEl.textContent = "00";
-      if (minutesEl) minutesEl.textContent = "00";
-      if (secondsEl) secondsEl.textContent = "00";
+      daysEl.textContent = "00";
+      hoursEl.textContent = "00";
+      minsEl.textContent = "00";
+      secsEl.textContent = "00";
       return;
     }
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / 1000 / 60) % 60);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const seconds = Math.floor((diff / 1000) % 60);
 
-    if (daysEl) daysEl.textContent = String(days).padStart(2, "0");
-    if (hoursEl) hoursEl.textContent = String(hours).padStart(2, "0");
-    if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, "0");
-    if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, "0");
+    daysEl.textContent = String(days).padStart(2, "0");
+    hoursEl.textContent = String(hours).padStart(2, "0");
+    minsEl.textContent = String(minutes).padStart(2, "0");
+    secsEl.textContent = String(seconds).padStart(2, "0");
   }
 
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // 3. Scratch-to-Reveal Canvas
-  const canvas = document.getElementById("scratch-canvas");
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#d4af37");
-    gradient.addColorStop(0.5, "#f3d57a");
-    gradient.addColorStop(1, "#b88924");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#5c1622";
-    ctx.font = "bold 16px Georgia, serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Scratch Here", canvas.width / 2, canvas.height / 2 + 5);
-
-    let isDrawing = false;
-
-    function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: ((clientX - rect.left) / rect.width) * canvas.width,
-        y: ((clientY - rect.top) / rect.height) * canvas.height
-      };
-    }
-
-    function scratch(e) {
-      if (!isDrawing) return;
-      e.preventDefault();
-      const { x, y } = getPos(e);
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.beginPath();
-      ctx.arc(x, y, 22, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    canvas.addEventListener("mousedown", (e) => { isDrawing = true; scratch(e); });
-    canvas.addEventListener("mousemove", scratch);
-    window.addEventListener("mouseup", () => { isDrawing = false; });
-
-    canvas.addEventListener("touchstart", (e) => { isDrawing = true; scratch(e); }, { passive: false });
-    canvas.addEventListener("touchmove", scratch, { passive: false });
-    window.addEventListener("touchend", () => { isDrawing = false; });
-  }
-
-  // 4. Soft Melody Toggle (Web Audio)
-  const soundBtn = document.getElementById("sound-toggle-btn");
-  let audioCtx = null;
-  let melodyTimer = null;
-  let isPlaying = false;
-
-  const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25];
-  let noteIndex = 0;
-
-  function playNote() {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = notes[noteIndex % notes.length];
-    noteIndex++;
-
-    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.1);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 1.15);
-  }
-
-  if (soundBtn) {
-    soundBtn.addEventListener("click", () => {
-      if (!isPlaying) {
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        playNote();
-        melodyTimer = setInterval(playNote, 900);
-        isPlaying = true;
-        soundBtn.textContent = "Melody: On";
-        soundBtn.setAttribute("aria-pressed", "true");
-      } else {
-        clearInterval(melodyTimer);
-        isPlaying = false;
-        soundBtn.textContent = "Melody: Off";
-        soundBtn.setAttribute("aria-pressed", "false");
-      }
-    });
-  }
-
-  // 5. RSVP & Blessings Form
+  /* ================= 5. RSVP FORM ================= */
   const rsvpForm = document.getElementById("rsvp-form");
-  const rsvpStatus = document.getElementById("rsvp-status");
+  const rsvpMessage = document.getElementById("rsvp-message");
 
-  if (rsvpForm && rsvpStatus) {
+  if (rsvpForm) {
     rsvpForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const name = document.getElementById("guest-name").value.trim();
-      rsvpStatus.textContent = `JazakAllah ${name}! Your blessing and RSVP have been recorded.`;
+      const status = document.getElementById("guest-status").value;
+
+      if (!name || !status) return;
+
+      rsvpMessage.textContent =
+        status === "attending"
+          ? `Thank you, ${name}! We look forward to welcoming you at the Walima.`
+          : `Thank you for letting us know, ${name}. You will be missed!`;
+
       rsvpForm.reset();
     });
   }
 });
+                                         
