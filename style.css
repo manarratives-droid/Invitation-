@@ -562,3 +562,28 @@ body {
     opacity: 0;
   }
 }
+.pink-heart-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 260px;
+  margin: 28px auto 6px;
+}
+
+.pink-heart-divider span {
+  flex: 1;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #f48fb1, #ec407a);
+}
+
+.pink-heart-divider span:last-child {
+  background: linear-gradient(90deg, #ec407a, #f48fb1, transparent);
+}
+
+.pink-heart-divider i {
+  font-style: normal;
+  color: #ec407a;
+  font-size: 1.1rem;
+  line-height: 1;
+}
